@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roman Converter</title>
+  <style>
+    /* ── Apple.com token system ───────────────────────────────── */
+    :root {
+      --white:       #ffffff;
+      --black:       #1d1d1f;
+      --dark-bg:     #000000;
+      --gray-bg:     #f5f5f7;
+      --body-text:   #1d1d1f;
+      --secondary:   #6e6e73;
+      --link:        #0066cc;
+      --link-hover:  #004499;
+      --border:      #d2d2d7;
+      --error-text:  #d70015;
+      --error-bg:    #fff2f3;
+      --success-text:#1a6629;
+      --success-bg:  #f3faf4;
+      --font:        -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      --mono:        "SF Mono", ui-monospace, "Courier New", monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--white);
+      color: var(--body-text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav — exact apple.com proportions ───────────────────── */
+    nav {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 22px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: var(--black);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 12px;
+      color: var(--black);
+      text-decoration: none;
+      opacity: 0.85;
+      transition: opacity 0.15s;
+    }
+    .nav-links a:hover { opacity: 1; }
+
+    /* ── Hero — white bg, giant headline like apple product pages */
+    .hero {
+      background: var(--white);
+      text-align: center;
+      padding: 80px 22px 72px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--secondary);
+      margin-bottom: 6px;
+    }
+    .hero-title {
+      font-size: clamp(40px, 6vw, 64px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.05;
+      color: var(--black);
+      margin-bottom: 16px;
+    }
+    .hero-sub {
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--secondary);
+      letter-spacing: -0.01em;
+      line-height: 1.4;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── Converter section — gray bg, centered card-less layout  */
+    .converter-section {
+      background: var(--gray-bg);
+      flex: 1;
+      padding: 60px 22px 80px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .converter-wrap {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    /* Field label — Apple's input caption style */
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Input — Apple Store search bar proportions */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      height: 50px;
+      padding: 0 18px;
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--black);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.18s, box-shadow 0.18s;
+      -webkit-appearance: none;
+    }
+    input[type="text"]::placeholder {
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 0;
+      color: #adadb8;
+    }
+    input[type="text"]:focus {
+      border-color: var(--link);
+      box-shadow: 0 0 0 3px rgba(0,102,204,0.15);
+    }
+
+    /* Convert button — Apple's filled CTA pill */
+    .btn-convert {
+      height: 50px;
+      padding: 0 24px;
+      background: var(--link);
+      color: var(--white);
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.18s;
+    }
+    .btn-convert:hover  { background: var(--link-hover); }
+    .btn-convert:active { background: #003380; }
+    .btn-convert:disabled {
+      background: var(--border);
+      color: var(--secondary);
+      cursor: not-allowed;
+    }
+
+    /* ── Divider with hint text */
+    .hint-row {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--secondary);
+    }
+
+    /* ── Result panel — clean rule above, no card */
+    .result-panel {
+      margin-top: 36px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .result-panel.visible { display: block; }
+
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--secondary);
+      margin-bottom: 10px;
+    }
+
+    /* The signature element: the number itself — enormous, razor-tracked  */
+    .result-number {
+      font-family: var(--mono);
+      font-size: clamp(56px, 12vw, 96px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--black);
+    }
+
+    .result-equation {
+      margin-top: 12px;
+      font-size: 15px;
+      color: var(--secondary);
+      letter-spacing: -0.01em;
+    }
+    .result-equation strong {
+      font-family: var(--mono);
+      font-weight: 600;
+      color: var(--black);
+      font-size: 14px;
+    }
+
+    /* Error state */
+    .result-panel.state-error .result-number { display: none; }
+    .result-panel.state-error .result-equation { display: none; }
+
+    .error-msg {
+      display: none;
+      background: var(--error-bg);
+      border: 1px solid rgba(215,0,21,0.18);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 15px;
+      color: var(--error-text);
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+    }
+    .result-panel.state-error .error-msg   { display: block; }
+    .result-panel.state-success .error-msg { display: none; }
+    .result-panel.state-success .result-number   { display: block; }
+    .result-panel.state-success .result-equation { display: block; }
+
+    /* ── How it works strip — dark bg like apple.com alternating sections */
+    .info-section {
+      background: var(--dark-bg);
+      color: var(--white);
+      padding: 64px 22px;
+      text-align: center;
+    }
+    .info-section h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.022em;
+      margin-bottom: 10px;
+    }
+    .info-section p {
+      font-size: 17px;
+      color: rgba(255,255,255,0.7);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+    .symbols-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+    .symbol-cell {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 14px 20px;
+      min-width: 88px;
+      flex: 1;
+    }
+    .symbol-char {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--white);
+      display: block;
+      letter-spacing: 0;
+    }
+    .symbol-val {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 4px;
+      display: block;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Footer — exact apple.com footer palette */
+    footer {
+      background: var(--gray-bg);
+      border-top: 1px solid var(--border);
+      padding: 20px 22px 28px;
+      text-align: center;
+    }
+    .footer-note {
+      font-size: 13px;
+      color: var(--secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px 16px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 12px;
+      color: var(--secondary);
+      text-decoration: none;
+      transition: color 0.12s;
+    }
+    .footer-links a:hover { color: var(--link); }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .input-row { flex-direction: column; }
+      .btn-convert { height: 46px; }
+      input[type="text"] { height: 46px; }
+      .nav-links { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="nav-logo" href="#">Roman Converter</a>
+      <ul class="nav-links" role="list">
+        <li><a href="#converter">Convert</a></li>
+        <li><a href="#reference">Reference</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <p class="hero-eyebrow">Roman Numeral Converter</p>
+    <h1 class="hero-title">Numbers,<br>translated.</h1>
+    <p class="hero-sub">Enter any Roman numeral and get the integer value instantly. Supports the full classical range I–MMMCMXCIX.</p>
+  </header>
+
+  <!-- Converter -->
+  <section class="converter-section" id="converter" aria-label="Converter">
+    <div class="converter-wrap">
+
+      <label class="field-label" for="romanInput">Roman Numeral</label>
+      <div class="input-row">
+        <input
+          type="text"
+          id="romanInput"
+          placeholder="e.g. MCMXCIV"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          aria-label="Roman numeral input"
+          onkeydown="handleKey(event)"
+          oninput="onTyping()"
+        />
+        <button class="btn-convert" id="convertBtn" onclick="convertRoman()">
+          Convert
+        </button>
+      </div>
+      <p class="hint-row">Press Return or click Convert.</p>
+
+      <!-- Result -->
+      <div class="result-panel" id="resultPanel" role="status" aria-live="polite" aria-atomic="true">
+        <p class="result-label" id="resultLabel">Result</p>
+        <div class="result-number" id="resultNumber"></div>
+        <p class="result-equation" id="resultEquation"></p>
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Reference -->
+  <section class="info-section" id="reference" aria-label="Roman numeral reference">
+    <h2>The seven symbols</h2>
+    <p>Classical Roman numerals use seven letters. Every value is built by combining and subtracting them in sequence.</p>
+    <div class="symbols-grid" role="table" aria-label="Roman numeral symbol values">
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char" role="cell">I</span>
+        <span class="symbol-val" role="cell">1</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">V</span>
+        <span class="symbol-val">5</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">X</span>
+        <span class="symbol-val">10</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">L</span>
+        <span class="symbol-val">50</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">C</span>
+        <span class="symbol-val">100</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">D</span>
+        <span class="symbol-val">500</span>
+      </div>
+      <div class="symbol-cell" role="row">
+        <span class="symbol-char">M</span>
+        <span class="symbol-val">1000</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-note">This is a simple Roman Numeral Converter project implemented by David, this is his Github profile: <a href="https://github.com/baonguyengrrg" target="_blank">baonguyengrrg</a>.</p>
+    <ul class="footer-links">
+    </ul>
+  </footer>
+
+  <script>
+    // ── Helpers ──────────────────────────────────────────────
+    function onTyping() {
+      // reset result when user starts editing again
+      const panel = document.getElementById('resultPanel');
+      if (panel.classList.contains('visible')) {
+        panel.classList.remove('visible','state-success','state-error');
+        setTimeout(() => { panel.style.display = 'none'; }, 10);
+      }
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') convertRoman();
+    }
+
+    function showPanel(state, opts) {
+      const panel = document.getElementById('resultPanel');
+      const lbl   = document.getElementById('resultLabel');
+      const num   = document.getElementById('resultNumber');
+      const eq    = document.getElementById('resultEquation');
+      const err   = document.getElementById('errorMsg');
+
+      panel.style.display = 'block';
+      panel.classList.remove('state-success','state-error');
+
+      if (state === 'success') {
+        lbl.textContent  = 'Result';
+        num.textContent  = opts.value;
+        eq.innerHTML     = `<strong>${opts.roman}</strong> = ${opts.value}`;
+        panel.classList.add('visible','state-success');
+      } else {
+        lbl.textContent  = 'Error';
+        err.textContent  = opts.message;
+        panel.classList.add('visible','state-error');
+      }
+    }
+
+    async function convertRoman() {
+      const inp   = document.getElementById('romanInput');
+      const btn   = document.getElementById('convertBtn');
+      const roman = inp.value.trim().toUpperCase();
+
+      if (!roman) {
+        showPanel('error', { message: 'Enter a Roman numeral to convert.' });
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Converting…';
+
+      try {
+        const res  = await fetch('http://127.0.0.1:8000/convert', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ roman })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          showPanel('success', { roman, value: data.result });
+        } else {
+          showPanel('error', { message: data.detail ?? 'The input is not a valid Roman numeral.' });
+        }
+      } catch (_) {
+        showPanel('error', { message: 'Could not reach the API server. Make sure uvicorn is running on port 8000.' });
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = 'Convert';
+      }
+    }
+  </script>
+</body>
+</html>
